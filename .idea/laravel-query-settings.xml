@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="LaravelQuerySettings">
+    <option name="filterDataSources" value="true" />
+    <option name="filteredDataSources">
+      <set>
+        <option value="adf10ee9-196d-4007-be0c-5a1a97e0b5d8&lt;-/lq/-&gt;madam" />
+      </set>
+    </option>
+  </component>
+</project>
