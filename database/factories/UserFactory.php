@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Faker\Providers\KenyaProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -23,9 +24,15 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $faker = $this->withFaker();
+        $faker->addProvider(new KenyaProvider($faker));
+        $name = $faker->name;
+        $nameArr = explode(" ", $name);
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => $name,
+            'username' => Str::lower("{$nameArr[0]}.{$nameArr[1]}"),
+            'email' => $faker->unique()->safeEmail(),
+            'phone' => $faker->unique()->kenyanPhone(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
