@@ -108,6 +108,7 @@ class DatabaseSeeder extends Seeder
 
             // Settings
             'manage_settings',
+            'view_audit_logs', 'view_audit_log', 'create_audit_log', 'update_audit_log', 'delete_audit_log',
         ];
 
 
