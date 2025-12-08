@@ -89,7 +89,7 @@ class DatabaseSeeder extends Seeder
             // TODO: Add more permissions for reports
 
             // Loan Products
-            'view_loan_products', 'view_loan_product', 'create_loan_product', 'update_loan_product', 'delete_loan_product',
+            'view_products', 'view_product', 'create_product', 'update_product', 'delete_product',
 
             // Collections
             'view_collections', 'create_collections', 'update_collections', 'delete_collections',
@@ -100,6 +100,10 @@ class DatabaseSeeder extends Seeder
             // Counties & Towns
             'view_counties', 'view_county', 'create_county', 'update_county', 'delete_county',
             'view_towns', 'view_town', 'create_town', 'update_town', 'delete_town',
+
+            // Banks & Branches
+            'view_banks', 'view_bank', 'create_bank', 'update_bank', 'delete_bank',
+            'view_branches', 'view_branch', 'create_branch', 'update_branch', 'delete_branch',
 
             // User & System Management
             'view_users', 'view_user', 'create_user', 'update_user', 'delete_user',
@@ -143,7 +147,7 @@ class DatabaseSeeder extends Seeder
                 // TODO: Add more permissions for reports
 
                 // Loan Products
-                'view_loan_products', 'view_loan_product', 'create_loan_product', 'update_loan_product', 'delete_loan_product',
+                'view_products', 'view_product', 'create_product', 'update_product', 'delete_product',
 
                 // Collections
                 'view_collections', 'create_collections', 'update_collections', 'delete_collections',
