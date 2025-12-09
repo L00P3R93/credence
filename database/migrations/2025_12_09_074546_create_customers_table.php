@@ -19,9 +19,9 @@ return new class extends Migration
             $table->string('phone')->unique()->index();
             $table->string('phone_alt')->nullable();
             $table->string('gender')->default('m');
-            $table->date('dob')->nullable();
-            $table->string('work_email')->nullable();
-            $table->string('personal_email')->nullable();
+            $table->date('dob');
+            $table->string('work_email')->unique()->index();
+            $table->string('personal_email')->unique()->index();
             $table->string('status')->default('active');
             $table->decimal('loan_limit', 10, 2)->default(0);
             $table->text('comments')->nullable();
@@ -33,6 +33,7 @@ return new class extends Migration
             $table->foreignIdFor(\App\Models\Bank::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(\App\Models\BankBranch::class)->nullable()->constrained()->cascadeOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::table('leads', function (Blueprint $table) {
