@@ -6,6 +6,7 @@ use App\Enums\ProductFrequency;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -19,4 +20,9 @@ class Product extends Model
         'is_active' => 'boolean',
         'rolls_over' => 'boolean',
     ];
+
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
 }
