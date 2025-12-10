@@ -206,9 +206,17 @@
       <path value="$PROJECT_DIR$/vendor/kirschbaum-development/eloquent-power-joins" />
       <path value="$PROJECT_DIR$/vendor/masterminds/html5" />
       <path value="$PROJECT_DIR$/vendor/owenvoke/blade-fontawesome" />
+      <path value="$PROJECT_DIR$/vendor/larastan/larastan" />
+      <path value="$PROJECT_DIR$/vendor/iamcal/sql-parser" />
+      <path value="$PROJECT_DIR$/vendor/phpstan/phpstan" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
+  <component name="PhpStan">
+    <PhpStan_settings>
+      <PhpStanConfiguration tool_path="$PROJECT_DIR$/vendor/bin/phpstan" />
+    </PhpStan_settings>
+  </component>
   <component name="PhpStanOptionsConfiguration">
     <option name="transferred" value="true" />
   </component>

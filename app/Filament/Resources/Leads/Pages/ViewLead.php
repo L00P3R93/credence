@@ -23,7 +23,8 @@ class ViewLead extends ViewRecord
                 ->icon(Heroicon::OutlinedUserPlus)
                 ->color('success')
                 ->action(function () {
-                    $customer = $this->record->convertToCustomer();
+                    $lead = $this->getRecord();
+                    $customer = $lead->convertToCustomer();
 
                     Notification::make()
                         ->title('Lead converted to customer successfully!')
@@ -32,7 +33,10 @@ class ViewLead extends ViewRecord
 
                     return redirect(CustomerResource::getUrl('view', ['record' => $customer->id]));
                 })
-                ->visible(fn () => $this->record->status->value === 'lead')
+                ->visible(function () {
+                    $lead = $this->getRecord();
+                    return $lead->status === \App\Enums\LeadStatus::LEAD;
+                })
                 ->requiresConfirmation()
                 ->modalHeading('Convert Lead to Customer')
                 ->modalDescription('Are you sure you want to convert this lead to a customer? This action cannot be undone.')

@@ -197,6 +197,9 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/voku/portable-ascii" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/webmozart/assert" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/owenvoke/blade-fontawesome" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/iamcal/sql-parser" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/larastan/larastan" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/phpstan/phpstan" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

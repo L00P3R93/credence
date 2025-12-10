@@ -18,24 +18,41 @@ class UserFactory extends Factory
     protected static ?string $password;
 
     /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (\App\Models\User $user) {
+            //
+        })->afterCreating(function (\App\Models\User $user) {
+            //
+        });
+    }
+
+    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
-        $faker = $this->withFaker();
+        $faker = \Faker\Factory::create();
         $faker->addProvider(new KenyaProvider($faker));
-        $name = $faker->name;
+
+        $name = $faker->name();
         $nameArr = explode(" ", $name);
+        $firstName = $nameArr[0] ?? 'user';
+        $lastName = $nameArr[1] ?? $faker->randomNumber(5);
+
         return [
             'name' => $name,
-            'username' => Str::lower("{$nameArr[0]}.{$nameArr[1]}"),
+            'username' => Str::lower("{$firstName}.{$lastName}"),
             'email' => $faker->unique()->safeEmail(),
             'phone' => $faker->unique()->kenyanPhone(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'status' => 'active',
         ];
     }
 

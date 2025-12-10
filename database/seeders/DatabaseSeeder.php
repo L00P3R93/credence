@@ -47,12 +47,12 @@ class DatabaseSeeder extends Seeder
             'status' => 'active',
         ]))->first();
         $admin->assignRole('Super Admin');
-        $this->command->info("✓ User {$admin->name} created and assigned to Super Admin role.");
+        $this->command->info("✓ User {$name} created and assigned to Super Admin role.");
 
         // Create Other Users
         $this->command->warn(PHP_EOL . 'Creating Non-Admin Users...');
         $users = $this->withProgressBar(20, fn () => User::factory(1)->create());
-        $users->each(function (User $user) {
+        $users->each(function (User $user, $index) {
             $roles = ['Admin', 'Assistant Admin', 'Collections Manager', 'Collections Officer', 'Team Leader Sales', 'Sales Officer'];
             $role = $roles[array_rand($roles)];
             $user->assignRole($role);
@@ -234,16 +234,11 @@ class DatabaseSeeder extends Seeder
         foreach ($counties as $countyName) {
             $county = County::create(['name' => $countyName]);
 
-            if (isset($towns[$countyName])) {
-                foreach ($towns[$countyName] as $town) {
-                    Town::create([
-                        'name' => $town,
-                        'county_id' => $county->id,
-                    ]);
-                }
-            } else {
-                // If not predefined, generate 5 random towns
-                Town::factory()->count(5)->create(['county_id' => $county->id]);
+            foreach ($towns[$countyName] as $town) {
+                Town::query()->create([
+                    'name' => $town,
+                    'county_id' => $county->id,
+                ]);
             }
         }
 

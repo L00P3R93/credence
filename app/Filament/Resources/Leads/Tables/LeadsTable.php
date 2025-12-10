@@ -22,6 +22,11 @@ class LeadsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                auth()->user()->isAdmin()
+                    ? $query->with('user')
+                    : $query->where('user_id', auth()->id());
+            })
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),

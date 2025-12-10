@@ -61,6 +61,7 @@ class LeadForm
                     ->required(),
                 DatePicker::make('dob')
                     ->label('Date Of Birth')
+                    ->native(false)
                     ->prefixIcon(FaIcon::CALENDAR)
                     ->prefixIconColor('primary'),
                 TextInput::make('work_email')
@@ -135,7 +136,7 @@ class LeadForm
                     ->label('Bank')
                     ->prefixIcon(FaIcon::UNIVERSITY)
                     ->prefixIconColor('primary')
-                    ->options(fn () => Bank::all()->pluck('name', 'id'))
+                    ->options(fn () => Bank::query()->pluck('name', 'id')->all())
                     ->native(false)
                     ->preload()
                     ->searchable()
@@ -226,7 +227,9 @@ class LeadForm
                     ->label('Added By')
                     ->prefixIcon(FaIcon::USER)
                     ->prefixIconColor('primary')
-                    ->relationship('user', 'name', fn (Builder $query) => $query->role(['Admin', 'Sales Officer'])->orderBy('name')->limit(10))
+                    ->relationship('user', 'name', fn (Builder $query) => $query->whereHas('roles', function($q) {
+                            $q->whereIn('name', ['Admin', 'Sales Officer']);
+                        })->orderBy('name')->limit(10))
                     ->native(false)
                     ->searchable()
                     ->preload()

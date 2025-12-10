@@ -16,20 +16,18 @@ class Dashboard extends BaseDashboard
     public function filtersForm(Schema $schema): Schema
     {
         return $schema->columns([
-           Section::make()->schema([
-               Select::make('loan_products')
-                   ->label('Loan Products')
-                   ->options([
-                       'Personal Loan' => 'Personal Loan',
-                       'Business Loan' => 'Business Loan',
-                   ])
-                   ->native(false),
-               DatePicker::make('start_date')
-                   ->maxDate(fn (Get $get) => $get('end_date') ?: now()),
-               DatePicker::make('end_date')
-                   ->minDate(fn (Get $get) => $get('start_date') ?: now())
-                   ->maxDate(now()),
-           ])->columns(3)->columnSpanFull()
+            Select::make('loan_products')
+                ->label('Loan Products')
+                ->options([
+                    'Personal Loan' => 'Personal Loan',
+                    'Business Loan' => 'Business Loan',
+                ])
+                ->native(false),
+            DatePicker::make('start_date')
+                ->maxDate(fn (Get $get) => $get('end_date') ?: now()),
+            DatePicker::make('end_date')
+                ->minDate(fn (Get $get) => $get('start_date') ?: now())
+                ->maxDate(now()),
         ]);
     }
 }

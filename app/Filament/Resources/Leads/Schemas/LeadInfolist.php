@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Leads\Schemas;
 
 use App\Enums\FaIcon;
+use App\Models\Customer;
 use App\Models\Lead;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -67,6 +68,15 @@ class LeadInfolist
                 ])->columns(3)->columnSpanFull(),
 
                 Section::make('System Info')->schema([
+                    TextEntry::make('convertedToCustomer.name')
+                        ->label('Converted to customer')
+                        ->visible(fn (Lead $lead) => $lead->convertedToCustomer()->exists())
+                        ->placeholder('Not Converted'),
+                    TextEntry::make('converted_at')
+                        ->dateTime()
+                        ->visible(fn (Lead $lead) => $lead->convertedToCustomer()->exists())
+                        ->placeholder('Not Converted'),
+
                     TextEntry::make('status')
                         ->label('Lead Status')
                         ->icon(FaIcon::SHIELD_ALT)
@@ -76,12 +86,6 @@ class LeadInfolist
                         ->icon(Heroicon::OutlinedUserPlus)
                         ->placeholder('System'),
 
-                    /*TextEntry::make('convertedToCustomer.name')
-                        ->label('Converted to customer')
-                        ->placeholder('-'),
-                    TextEntry::make('converted_at')
-                        ->dateTime()
-                        ->placeholder('-'),*/
 
                     TextEntry::make('created_at')
                         ->label('Created Date')

@@ -10,10 +10,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Customer extends Model
+class Customer extends Model implements HasMedia
 {
-    use HasFactory, Auditable, SoftDeletes;
+    use HasFactory, Auditable, SoftDeletes, InteractsWithMedia;
 
     protected $table = 'customers';
 
@@ -51,5 +53,24 @@ class Customer extends Model
     public function address(): HasOne
     {
         return $this->hasOne(Address::class);
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('profile-photo')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/jpg'])
+            ->useDisk('public')
+            ->singleFile();
+
+        $this->addMediaCollection('documents')
+            ->acceptsMimeTypes([
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'image/jpeg',
+                'image/png',
+                'text/plain',
+            ])
+            ->useDisk('public');
     }
 }
