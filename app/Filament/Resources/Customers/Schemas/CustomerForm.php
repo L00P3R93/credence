@@ -33,7 +33,6 @@ class CustomerForm
         return $schema
             ->components([
                 Section::make('Personal Details')->schema([
-
                     SpatieMediaLibraryFileUpload::make('profile-photo')
                         ->label('Customer Photo')
                         ->image()
@@ -261,7 +260,7 @@ class CustomerForm
                         ->columnSpanFull(),
                     MarkdownEditor::make('collection_comments')
                         ->columnSpanFull(),
-                ])->columnSpanFull(),
+                ])->columnSpanFull()->collapsed(),
             ]);
     }
 }
