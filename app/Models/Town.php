@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Town extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable;
 
     protected $table = 'towns';
 

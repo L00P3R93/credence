@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Address extends Model
 {
-    use HasFactory, Auditable, SoftDeletes;
+    use Auditable, SoftDeletes;
 
     protected $table = 'addresses';
 

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class County extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable;
 
     protected $table = 'counties';
 

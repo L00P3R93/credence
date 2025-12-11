@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Filament\Resources\Customers\Tables;
+namespace App\Filament\Resources\Loans\Tables;
 
 use App\Enums\CustomerStatus;
-use App\Enums\FaIcon;
+use App\Enums\LoanStatus;
+use App\Models\Loan;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -18,70 +20,55 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class CustomersTable
+class LoansTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
                 auth()->user()->isAdmin()
-                    ? $query->with('user')
-                    : $query->where('user_id', auth()->id());
+                    ? $query->with('customer')
+                    : $query->where('agent', auth()->id())->orWhere('temp_agent', auth()->id());
             })
+            ->defaultSort('id', 'desc')
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('id')
+                    ->label('Loan Ref')
+                    ->sortable(),
+                TextColumn::make('customer.name')
                     ->searchable(),
-                TextColumn::make('id_no')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('phone')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('phone_alt')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('gender')
-                    ->badge()
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('dob')
+                TextColumn::make('given_date')
+                    ->date()
+                    ->sortable(),
+                TextColumn::make('due_date')
                     ->date()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('work_email')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('personal_email')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('product.name')
-                    ->searchable(),
-                TextColumn::make('bank.name')
-                    ->searchable(),
-                TextColumn::make('bankBranch.name')
-                    ->searchable(),
-                TextColumn::make('loan_limit')
+                TextColumn::make('loan_amount')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('loan_total')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge()
                     ->searchable(),
-                IconColumn::make('has_loan')
-                    ->boolean()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                IconColumn::make('has_cheques')
-                    ->boolean()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('user.name')
-                    ->label('Added By')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-
+                // Show Product and Bank together eg 'Product | Bank'
+                TextColumn::make('Product Details')
+                    ->label('Product | Bank')
+                    ->state(function (Loan $record) {
+                        return $record->product->name . ' | ' . $record->bank->name;
+                    })
+                    ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deleted_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -95,7 +82,7 @@ class CustomersTable
                     ->searchable(),
                 SelectFilter::make('status')
                     ->label('Status')
-                    ->options(CustomerStatus::class)
+                    ->options(LoanStatus::class)
                     ->native(false)
                     ->searchable(),
                 SelectFilter::make('bank_id')
@@ -106,8 +93,8 @@ class CustomersTable
                     ->searchable()
             ])
             ->recordActions([
-                ViewAction::make()->icon(FaIcon::EYE_REGULAR)->iconButton()->color('primary')->tooltip('View Customer'),
-                EditAction::make()->icon(FaIcon::PENCIL_ALT)->iconButton()->color('warning')->tooltip('Edit'),
+                ViewAction::make()->icon(Heroicon::OutlinedEye)->iconButton()->color('primary')->tooltip('View Loan'),
+                EditAction::make()->icon(Heroicon::OutlinedPencil)->iconButton()->color('warning')->tooltip('Edit Loan'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -115,8 +102,8 @@ class CustomersTable
                 ]),
             ])
             ->groups([
-                Group::make('created_at')
-                    ->label('Date Created')
+                Group::make('given_date')
+                    ->label('Date Given')
                     ->date()
                     ->collapsible()
             ]);

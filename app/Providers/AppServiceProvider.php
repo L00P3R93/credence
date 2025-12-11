@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Lead;
+use App\Models\Loan;
 use App\Models\User;
+use App\Observers\LeadObserver;
+use App\Observers\LoanObserver;
 use App\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\URL;
@@ -29,5 +33,7 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
         User::observe(UserObserver::class);
+        Lead::observe(LeadObserver::class);
+        Loan::observe(LoanObserver::class);
     }
 }

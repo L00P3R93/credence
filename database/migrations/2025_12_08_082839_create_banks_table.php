@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('banks', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('payday');
+            $table->integer('payday')->default(23);
+            $table->integer('weekend_pushes')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();

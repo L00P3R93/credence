@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\Customers\Schemas;
 
+use App\Enums\CustomerStatus;
 use App\Enums\FaIcon;
 use App\Models\Customer;
 use App\Models\Lead;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -146,6 +149,30 @@ class CustomerInfolist
                     ->icon(Heroicon::OutlinedTrash)
                     ->placeholder('Unknown')
                     ->visible(fn (Customer $record): bool => $record->trashed()),
+
+                ActionGroup::make([
+                    Action::make('give_loan')
+                        ->label('Give Loan')
+                        ->icon('heroicon-o-banknotes')
+                        ->color('success')
+                        ->size('sm')
+                        ->url(fn (Customer $record) => route('filament.admin.resources.loans.create', [
+                            'customer_id' => $record->id,
+                            'customer_name' => $record->name,
+                            'product_id' => $record->product_id,
+                            'product_name' => $record->product->name,
+                            'bank_id' => $record->bank_id,
+                            'bank_name' => $record->bank->name,
+                            'bank_branch_id' => $record->bank_branch_id,
+                            'bank_branch_name' => $record->bankBranch->name,
+                            'loan_limit' => $record->loan_limit
+                        ]))
+                        ->visible(fn (Customer $record) =>
+                            $record->status === CustomerStatus::ACTIVE->value &&
+                            $record->loan_limit > 5000 &&
+                            $record->loans()->whereNotIn('status', ['cleared', 'canceled', 'deleted'])->doesntExist()
+                        ),
+                ])
 
             ])->columns(2)->columnSpanFull(),
         ]);

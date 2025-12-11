@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class Lead extends Model
 {
-    use HasFactory, Auditable, SoftDeletes;
+    use Auditable, SoftDeletes;
 
     protected $table = 'leads';
 

@@ -8,6 +8,7 @@ use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
@@ -15,7 +16,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Customer extends Model implements HasMedia
 {
-    use HasFactory, Auditable, SoftDeletes, InteractsWithMedia;
+    use Auditable, SoftDeletes, InteractsWithMedia;
 
     protected $table = 'customers';
 
@@ -55,6 +56,11 @@ class Customer extends Model implements HasMedia
         return $this->hasOne(Address::class);
     }
 
+    public function loans(): HasMany
+    {
+        return $this->hasMany(Loan::class);
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('profile-photo')
@@ -73,4 +79,13 @@ class Customer extends Model implements HasMedia
             ])
             ->useDisk('public');
     }
+
+    public function canGetNewLoan(): bool
+    {
+        return $this->status === CustomerStatus::ACTIVE->value &&
+            $this->loan_limit > 5000 &&
+            $this->loans()->whereNotIn('status', ['cleared', 'canceled', 'deleted'])->doesntExist();
+    }
+
+
 }
