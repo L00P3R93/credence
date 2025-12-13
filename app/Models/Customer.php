@@ -82,9 +82,7 @@ class Customer extends Model implements HasMedia
 
     public function canGetNewLoan(): bool
     {
-        return $this->status === CustomerStatus::ACTIVE->value &&
-            $this->loan_limit > 5000 &&
-            $this->loans()->whereNotIn('status', ['cleared', 'canceled', 'deleted'])->doesntExist();
+        return $this->status === CustomerStatus::ACTIVE && $this->loan_limit > 5000 && $this->loans()->whereNotIn('status', ['cleared', 'canceled', 'deleted'])->doesntExist();
     }
 
 

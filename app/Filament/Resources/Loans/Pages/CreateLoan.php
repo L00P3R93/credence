@@ -23,6 +23,14 @@ class CreateLoan extends CreateRecord
         $data['top_up'] = false;
         $data['created_by'] = auth()->id();
 
+        // Remove the toggle fields as they're not in the database
+        unset($data['this_due'], $data['next_due']);
+
+        // Ensure customer_id is set from the URL parameter
+        if (!isset($data['customer_id']) && request()->has('customer_id')) {
+            $data['customer_id'] = request('customer_id');
+        }
+
         return $data;
     }
 

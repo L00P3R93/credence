@@ -18,7 +18,7 @@ class LoanObserver
             'bank_id' => $customer->bank_id,
             'bank_branch_id' => $customer->bank_branch_id,
             'product_id' => $customer->product_id,
-            'agent' => $customer->added_by,
+            'agent' => $customer->user->id,
             'status' => 'pending_verification',
             'created_by' => auth()->id(),
         ]);

@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('status')->default('pending_verification'); // pending_verification, pending_confirmation, pending_approval, pending_disbursement, disbursed, overdue, past_overdue, canceled, written_off, fraud, deleted
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->foreignId('collection_agent')->nullable()->constrained('users')->cascadeOnDelete();
-            $table->foreignId('collection_officer')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('collection_officer')->nullable()->constrained('users')->cascadeOnDelete();
             $table->foreignIdFor(\App\Models\Product::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(\App\Models\Bank::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(\App\Models\BankBranch::class)->constrained()->cascadeOnDelete();

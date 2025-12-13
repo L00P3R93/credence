@@ -60,6 +60,13 @@ class AdminPanelProvider extends PanelProvider
                 //AccountWidget::class,
                 //FilamentInfoWidget::class,
             ])
+            ->navigationGroups([
+                'Leads & Customers',
+                'Loan Management',
+                'Banks & Branches',
+                'User Management',
+                'System Management'
+            ])
             ->navigationItems([
                 NavigationItem::make('System Logs')
                     ->url('/log-viewer')

@@ -4,13 +4,16 @@ namespace App\Filament\Resources\Loans\Schemas;
 
 use App\Enums\LoanStatus;
 use App\Models\Customer;
+use App\Models\Loan;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class LoanForm
 {
@@ -21,13 +24,20 @@ class LoanForm
         $bankId = request()->input('bank_id');
         $bankBranchId = request()->input('bank_branch_id');
         $customer = $customerId ? Customer::find($customerId) : null;
+
+        $loanPeriod = [];
+        // Loan Period array for 4 months
+        for ($i = 1; $i <= 4; $i++) {
+            $loanPeriod[$i] = "$i Month(s)";
+        }
         return $schema
             ->components([
                 Section::make('Customer Information')->schema([
-                    TextInput::make('customer_name')
+                    Select::make('customer_id')
                         ->label('Customer')
+                        ->relationship('customer', 'name')
                         ->disabled()
-                        ->default(fn () => request()->input('customer_name')),
+                        ->default($customerId),
                     TextInput::make('product_name')
                         ->label('Loan Product')
                         ->disabled()
@@ -47,17 +57,13 @@ class LoanForm
                         ->default(fn () => request()->input('loan_limit')),
 
 
-                    TextInput::make('customer_id')
-                        ->hidden()
+                    Hidden::make('customer_id')
                         ->default($customerId),
-                    TextInput::make('product_id')
-                        ->hidden()
+                    Hidden::make('product_id')
                         ->default($productId),
-                    TextInput::make('bank_id')
-                        ->hidden()
+                    Hidden::make('bank_id')
                         ->default($bankId),
-                    TextInput::make('bank_branch_id')
-                        ->hidden()
+                    Hidden::make('bank_branch_id')
                         ->default($bankBranchId),
                 ])->columns(2)->columnSpanFull(),
 
@@ -65,18 +71,89 @@ class LoanForm
                     TextInput::make('loan_amount')
                         ->required()
                         ->numeric()
+                        ->step(500)
                         ->default(0.0),
-                    TextInput::make('loan_period')
+                    Select::make('loan_period')
+                        ->options($loanPeriod)
+                        ->native(false)
+                        ->searchable()
                         ->required()
-                        ->numeric()
                         ->default(1),
-                    TextInput::make('agent')
-                        ->required()
-                        ->numeric(),
-                    TextInput::make('temp_agent')
-                        ->numeric()
-                        ->default(null),
+
+                    Toggle::make('this_due')
+                        ->label('Due This Month')
+                        ->default(true) // Default to this month
+                        ->reactive()
+                        ->afterStateUpdated(function (callable $get, callable $set) {
+                            if ($get('this_due')) {
+                                $set('next_due', false);
+                            }
+                        }),
+
+                    Toggle::make('next_due')
+                        ->label('Due Next Month')
+                        ->default(false)
+                        ->reactive()
+                        ->afterStateUpdated(function (callable $get, callable $set) {
+                            if ($get('next_due')) {
+                                $set('this_due', false);
+                            }
+                        }),
+
+                    Select::make('agent')
+                        ->label('Sales Agent Portfolio')
+                        ->relationship(name: 'agent', titleAttribute: 'name')
+                        ->searchable()
+                        ->preload()
+                        ->default($customer?->user?->id)
+                        ->native(false)
+                        ->hidden(fn () => $customer?->loans?->whereNotIn('status', ['cancelled', 'deleted'])->count() > 0)
+                        ->required(),
+
+                    Select::make('temp_agent')
+                        ->label('Sales Agent This Month')
+                        ->relationship(name: 'tempAgent', titleAttribute: 'name')
+                        ->searchable()
+                        ->preload()
+                        ->default($customer?->user?->id)
+                        ->native(false)
+                        ->hidden(fn () => $customer?->loans?->whereNotIn('status', ['cancelled', 'deleted'])->count() <= 0)
+                        ->required(),
                 ])->columns(2)->columnSpanFull(),
+
+                Section::make('Loan Edit')->schema([
+                    DatePicker::make('given_date')
+                        ->native(false)
+                        ->required(),
+                    DatePicker::make('due_date')
+                        ->native(false)
+                        ->required(),
+                    TextInput::make('loan_interest')
+                        ->required()
+                        ->numeric()
+                        ->default(0.0)
+                        ->step(500)
+                    ->minValue(0)
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set, $get){
+                        $loan_amount = (float) $get('loan_amount');
+                        $loan_interest = (float) $state;
+                        $loan_period = (int) $get('loan_period');
+                        $processing_fee = round($loan_amount * 0.05);
+                        $installment = round($loan_amount / $loan_period);
+                        $loan_total = $installment * $loan_period;
+                        $set('loan_total', $loan_total);
+                        $set('processing_fee', $processing_fee);
+                    }),
+                    TextInput::make('processing_fee')
+                        ->required()
+                        ->numeric()
+                        ->default(0.0),
+                    TextInput::make('loan_total')
+                        ->required()
+                        ->numeric()
+                        ->default(0.0),
+                ])->visible(fn (?Loan $record) => $record !== null)->columns(2)->columnSpanFull()
             ]);
     }
 }

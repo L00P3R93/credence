@@ -20,6 +20,11 @@ class Loan extends Model implements HasMedia
 
     protected $table = 'loans';
 
+    protected $guarded = [
+        'this_due',
+        'next_due'
+    ];
+
     protected $casts = [
         'given_date' => 'date',
         'due_date' => 'date',
@@ -91,6 +96,29 @@ class Loan extends Model implements HasMedia
                 'text/plain',
             ])
             ->useDisk('public');
+    }
+
+    public static function getValidationRules(): array
+    {
+        return [
+            'customer_id' => 'required|exists:customers,id',
+            'given_date' => 'required|date',
+            'due_date' => 'required|date|after:given_date',
+            'loan_amount' => 'required|numeric|min:5000',
+            'loan_interest' => 'required|numeric|min:0',
+            'processing_fee' => 'required|numeric|min:0',
+            'loan_total' => 'required|numeric|min:0',
+            'loan_period' => 'required|integer|min:1|max:12',
+            'agent' => 'required|exists:users,id',
+            'temp_agent' => 'nullable|exists:users,id',
+            'collection_agent' => 'nullable|exists:users,id',
+            'collection_officer' => 'nullable|exists:users,id',
+            'status' => 'required|in:' . implode(',', array_column(LoanStatus::cases(), 'value')),
+            'created_by' => 'required|exists:users,id',
+            'product_id' => 'required|exists:products,id',
+            'bank_id' => 'required|exists:banks,id',
+            'bank_branch_id' => 'required|exists:bank_branches,id',
+        ];
     }
 
     public function calculate($next_due = false, $this_due = false, $dd = 0): void

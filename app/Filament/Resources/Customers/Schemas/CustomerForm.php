@@ -49,12 +49,18 @@ class CustomerForm
                         ->required(),
                     TextInput::make('id_no')
                         ->label('National ID/Passport No')
+                        ->unique(ignoreRecord: true)
                         ->prefixIcon(FaIcon::ID_CARD)
-                        ->prefixIconColor('primary'),
+                        ->prefixIconColor('primary')
+                        ->required()
+                        ->validationMessages([
+                            'required' => 'Phone number is required.',
+                            'unique' => 'Phone number already exists.',
+                        ]),
                     TextInput::make('phone')
                         ->label('Primary Phone Number')
                         ->tel()
-                        ->unique(ignoreRecord: false)
+                        ->unique(ignoreRecord: true)
                         ->telRegex('/^(?:\+254|254|0)(7\d{8}|1\d{8})$/')
                         ->prefixIcon(FaIcon::PHONE_SQUARE)
                         ->prefixIconColor('primary')
@@ -81,7 +87,7 @@ class CustomerForm
                     TextInput::make('work_email')
                         ->label('Work Email address')
                         ->email()
-                        ->unique(ignoreRecord: false)
+                        ->unique(ignoreRecord: true)
                         ->prefixIcon(Heroicon::AtSymbol)
                         ->prefixIconColor('primary')
                         ->validationMessages([
@@ -92,7 +98,7 @@ class CustomerForm
                     TextInput::make('personal_email')
                         ->label('Personal Email address')
                         ->email()
-                        ->unique(ignoreRecord: false)
+                        ->unique(ignoreRecord: true)
                         ->prefixIcon(FaIcon::AT)
                         ->prefixIconColor('primary')
                         ->validationMessages([
@@ -241,13 +247,12 @@ class CustomerForm
                         ->label('Added By')
                         ->prefixIcon(FaIcon::USER)
                         ->prefixIconColor('primary')
-                        ->relationship('user', 'name', fn (Builder $query) => $query->whereHas('roles', function($q) {
-                            $q->whereIn('name', ['Admin', 'Sales Officer']);
-                        })->orderBy('name')->limit(10))
+                        ->relationship('user', 'name', fn (Builder $query) => $query->orderBy('name')->limit(10))
                         ->native(false)
+                        ->default(auth()->id())
+                        ->hidden(fn () => !auth()->user()->isAdmin())
                         ->searchable()
-                        ->preload()
-                        ->required(),
+                        ->preload(),
                     TextInput::make('loan_limit')
                         ->required()
                         ->prefixIcon(FaIcon::HASHTAG)
