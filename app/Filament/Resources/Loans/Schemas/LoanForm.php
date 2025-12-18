@@ -20,10 +20,11 @@ class LoanForm
     public static function configure(Schema $schema): Schema
     {
         $customerId = request()->input('customer_id');
-        $productId = request()->input('product_id');
-        $bankId = request()->input('bank_id');
-        $bankBranchId = request()->input('bank_branch_id');
         $customer = $customerId ? Customer::find($customerId) : null;
+        $productId = $customer?->product_id;
+        $bankId = $customer?->bank_id;
+        $bankBranchId = $customer?->bank_branch_id;
+        $loanLimit = $customer?->loan_limit;
 
         $loanPeriod = [];
         // Loan Period array for 4 months
@@ -38,18 +39,20 @@ class LoanForm
                         ->relationship('customer', 'name')
                         ->disabled()
                         ->default($customerId),
-                    TextInput::make('product_name')
+                    Select::make('product_id')
                         ->label('Loan Product')
                         ->disabled()
-                        ->default(fn () => request()->input('product_name')),
-                    TextInput::make('bank_name')
+                        ->default($productId),
+                    Select::make('bank_id')
                         ->label('Bank')
+                        ->relationship('bank', 'name')
                         ->disabled()
-                        ->default(fn () => request()->input('bank_name')),
-                    TextInput::make('bank_branch_name')
+                        ->default($bankId),
+                    Select::make('bank_branch_id')
                         ->label('Bank Branch')
+                        ->relationship('bankBranch', 'name')
                         ->disabled()
-                        ->default(fn () => request()->input('bank_branch_name')),
+                        ->default($bankBranchId),
                     TextInput::make('loan_limit')
                         ->label('Loan Limit')
                         ->numeric()

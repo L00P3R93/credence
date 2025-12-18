@@ -42,7 +42,7 @@ class LoanObserver
      */
     public function created(Loan $loan): void
     {
-        $loan->customer->update(['has_loan' => true]);
+        $loan->customer->updateHasLoan(true);
     }
 
     /**
@@ -58,7 +58,7 @@ class LoanObserver
      */
     public function deleted(Loan $loan): void
     {
-        //
+        $loan->customer->updateHasLoan(false);
     }
 
     /**
