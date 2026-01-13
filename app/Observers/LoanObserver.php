@@ -10,6 +10,7 @@ class LoanObserver
     {
         // Mark as new loan
         $customer = $loan->customer;
+        $userName = auth()->user()->name ?? 'System';
 
         $loan->given_date = now();
 
@@ -21,9 +22,10 @@ class LoanObserver
             'agent' => $customer->user->id,
             'status' => 'pending_verification',
             'created_by' => auth()->id(),
+            'remarks' => "Loan Created By {$userName} on ".now()->format('Y-m-d H:i:s')
         ]);
 
-        if ($customer->loans()->where('status', '!=', ['canceled', 'deleted'])->count()  == 0){
+        if ($customer->loans()->where('status', '!=', ['canceled', 'deleted'])->count()  == 0) {
             $loan->new_loan = true;
         } else {
             $loan->old_loan = true;

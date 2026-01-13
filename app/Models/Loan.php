@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use PHPUnit\Event\Telemetry\System;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -44,7 +45,7 @@ class Loan extends Model implements HasMedia
         return $this->belongsTo(Customer::class);
     }
 
-    public function agent(): BelongsTo
+    public function salesAgent(): BelongsTo
     {
         return $this->belongsTo(User::class, 'agent');
     }
@@ -191,4 +192,6 @@ class Loan extends Model implements HasMedia
 
         return $dueDate;
     }
+
+
 }

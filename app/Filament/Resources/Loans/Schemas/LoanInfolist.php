@@ -55,6 +55,9 @@ class LoanInfolist
                     ->label('Bank'),
                 TextEntry::make('bankBranch.name')
                     ->label('Bank branch'),
+                TextEntry::make('remarks')
+                    ->label('Remarks')
+                    ->html(),
                 TextEntry::make('created_at')
                     ->dateTime()
                     ->placeholder('-'),

@@ -33,9 +33,16 @@ class LoansTable
             ->defaultSort('id', 'desc')
             ->columns([
                 TextColumn::make('id')
-                    ->label('Loan Ref')
+                    ->label('Ref')
                     ->sortable(),
                 TextColumn::make('customer.name')
+                    ->searchable(),
+                // Show Product and Bank together eg 'Product | Bank'
+                TextColumn::make('Product Details')
+                    ->label('Product | Bank')
+                    ->state(function (Loan $record) {
+                        return $record->product->name . ' | ' . $record->bank->name;
+                    })
                     ->searchable(),
                 TextColumn::make('given_date')
                     ->date()
@@ -53,13 +60,7 @@ class LoansTable
                 TextColumn::make('status')
                     ->badge()
                     ->searchable(),
-                // Show Product and Bank together eg 'Product | Bank'
-                TextColumn::make('Product Details')
-                    ->label('Product | Bank')
-                    ->state(function (Loan $record) {
-                        return $record->product->name . ' | ' . $record->bank->name;
-                    })
-                    ->searchable(),
+
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

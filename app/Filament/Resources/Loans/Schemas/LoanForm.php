@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -41,6 +42,7 @@ class LoanForm
                         ->default($customerId),
                     Select::make('product_id')
                         ->label('Loan Product')
+                        ->relationship('product', 'name')
                         ->disabled()
                         ->default($productId),
                     Select::make('bank_id')
@@ -57,7 +59,7 @@ class LoanForm
                         ->label('Loan Limit')
                         ->numeric()
                         ->disabled()
-                        ->default(fn () => request()->input('loan_limit')),
+                        ->default($loanLimit),
 
 
                     Hidden::make('customer_id')
@@ -74,8 +76,21 @@ class LoanForm
                     TextInput::make('loan_amount')
                         ->required()
                         ->numeric()
-                        ->step(500)
-                        ->default(0.0),
+                        ->minValue(0)
+                        ->maxValue(fn (Get $get) => $get('loan_limit'))
+                        ->reactive()
+                        ->rules([
+                            'required',
+                            'numeric',
+                            'min:5000',
+                        ])
+                        ->validationMessages([
+                            'max' => 'Loan amount cannot exceed the customer\'s loan limit',
+                            'min' => 'Loan amount cannot be less than 5000',
+                            'required' => 'Loan amount is required',
+                            'numeric' => 'Loan amount must be a number',
+                        ])
+                        ->dehydrateStateUsing(fn ($state) => (float) $state),
                     Select::make('loan_period')
                         ->options($loanPeriod)
                         ->native(false)
@@ -105,7 +120,7 @@ class LoanForm
 
                     Select::make('agent')
                         ->label('Sales Agent Portfolio')
-                        ->relationship(name: 'agent', titleAttribute: 'name')
+                        ->relationship(name: 'salesAgent', titleAttribute: 'name')
                         ->searchable()
                         ->preload()
                         ->default($customer?->user?->id)

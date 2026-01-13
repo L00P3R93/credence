@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Loans;
 
 use App\Enums\FaIcon;
+use App\Enums\LoanStatus;
 use App\Filament\Resources\Loans\Pages\CreateLoan;
 use App\Filament\Resources\Loans\Pages\EditLoan;
 use App\Filament\Resources\Loans\Pages\ListLoans;
@@ -79,5 +80,22 @@ class LoanResource extends Resource
             'due_date',
             'status',
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $modelClass = static::getModel();
+        $pendingCount = $modelClass::query()->whereIn('status', [LoanStatus::PENDING_CONFIRMATION, LoanStatus::PENDING_VERIFICATION, LoanStatus::PENDING_APPROVAL, LoanStatus::PENDING_DISBURSEMENT])->count();
+        return $pendingCount > 0 ? (string) $pendingCount : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'info';
+    }
+
+    public static function getNavigationBadgeTooltip(): string
+    {
+        return 'Pending Loans';
     }
 }
