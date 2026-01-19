@@ -63,6 +63,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 'Leads & Customers',
                 'Loan Management',
+                'Payments',
                 'Banks & Branches',
                 'User Management',
                 'System Management'
