@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\LoanStatus;
 use App\Traits\Auditable;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Filament\Support\Concerns\HasMediaFilter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -83,6 +84,11 @@ class Loan extends Model implements HasMedia
     public function bankBranch(): BelongsTo
     {
         return $this->belongsTo(BankBranch::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
     }
 
     public function registerMediaCollections(): void

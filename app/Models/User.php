@@ -128,4 +128,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     {
         return $this->hasMany(Loan::class, 'collection_officer');
     }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'added_by');
+    }
 }

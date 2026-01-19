@@ -61,6 +61,11 @@ class Customer extends Model implements HasMedia
         return $this->hasMany(Loan::class);
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('profile-photo')
