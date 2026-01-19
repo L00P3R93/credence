@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Observers\LeadObserver;
 use App\Observers\LoanObserver;
 use App\Observers\UserObserver;
+use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
