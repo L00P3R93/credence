@@ -7,6 +7,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
 
 class LoanInfolist
 {
@@ -75,21 +76,48 @@ class LoanInfolist
                         TextEntry::make('loan_amount')
                             ->money('KES')
                             ->weight('font-bold')
-                            ->icon('heroicon-o-currency-dollar'),
+                            ->icon('heroicon-o-currency-dollar')
+                            ->formatStateUsing(fn ($state) => number_format($state)),
 
                         TextEntry::make('loan_interest')
                             ->money('KES')
-                            ->icon('heroicon-o-chart-bar'),
+                            ->icon('heroicon-o-chart-bar')
+                            ->formatStateUsing(fn ($state) => number_format($state)),
 
-                        TextEntry::make('processing_fee')
-                            ->money('KES')
-                            ->icon('heroicon-o-receipt-percent'),
+                        Group::make()->schema([
+                            TextEntry::make('processing_fee')
+                                ->money('KES')
+                                ->icon('heroicon-o-receipt-percent')
+                                ->formatStateUsing(fn ($state) => number_format($state)),
 
-                        TextEntry::make('loan_total')
-                            ->money('USD')
-                            ->weight('font-bold')
-                            ->color('success')
-                            ->icon('heroicon-o-calculator'),
+                            TextEntry::make('amount_paid')
+                                ->money('KES')
+                                ->icon('heroicon-o-calculator')
+                                ->weight('font-bold')
+                                ->color('success')
+                                ->getStateUsing(fn (Loan $record) => $record->payments()->sum('amount'))
+                                ->formatStateUsing(fn ($state) => number_format($state)),
+                        ])->columns(2),
+
+
+
+                        Group::make()->schema([
+                            TextEntry::make('loan_total')
+                                ->money('KES')
+                                ->weight('font-bold')
+                                ->color('blue')
+                                ->icon('heroicon-o-calculator')
+                                ->formatStateUsing(fn ($state) => number_format($state)),
+
+                            TextEntry::make('loan_balance')
+                                ->label('Loan Balance')
+                                ->money('KES')
+                                ->weight('font-bold')
+                                ->color('danger')
+                                ->icon('heroicon-o-calculator')
+                                ->getStateUsing(fn (Loan $record) => $record->loanBalance())
+                                ->formatStateUsing(fn ($state) => number_format($state)),
+                        ])->columns(2),
                     ]),
 
                 Section::make('Administrative Information')

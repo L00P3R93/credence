@@ -199,5 +199,9 @@ class Loan extends Model implements HasMedia
         return $dueDate;
     }
 
+    public function loanBalance(): float
+    {
+        return $this->loan_balance = $this->loan_total - $this->payments()->sum('amount');
+    }
 
 }
