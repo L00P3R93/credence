@@ -39,7 +39,7 @@ class MarkDisbursedAction extends Action
                 $userName = auth()->user()->name ?? 'System';
                 $loan->update([
                     'status' => LoanStatus::DISBURSED,
-                    'remarks' => "Loan Marked as Disbursed By {$userName} on " . now()->format('Y-m-d H:i:s'),
+                    'remarks' => $loan->remarks . "<br>Loan Marked as Disbursed By {$userName} on " . now()->format('Y-m-d H:i:s'),
                 ]);
                 Notification::make()
                     ->title('Marked as Disbursed')

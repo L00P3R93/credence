@@ -32,7 +32,7 @@ class VerifyLoanAction extends Action
                 $userName = auth()->user()->name ?? 'System';
                 $loan->update([
                     'status' => LoanStatus::PENDING_CONFIRMATION,
-                    'remarks' => "Loan Verified By {$userName} on " . now()->format('Y-m-d H:i:s'),
+                    'remarks' => $loan->remarks . "<br>Loan Verified By {$userName} on " . now()->format('Y-m-d H:i:s'),
                 ]);
                 Notification::make()
                     ->title('Loan Verified Successfully')

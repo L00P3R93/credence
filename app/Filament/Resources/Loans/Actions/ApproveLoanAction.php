@@ -31,7 +31,7 @@ class ApproveLoanAction extends Action
                 $userName = auth()->user()->name ?? 'System';
                 $loan->update([
                     'status' => LoanStatus::PENDING_DISBURSEMENT,
-                    'remarks' => "Loan Approved By {$userName} on " . now()->format('Y-m-d H:i:s'),
+                    'remarks' => $loan->remarks . "<br>Loan Approved By {$userName} on " . now()->format('Y-m-d H:i:s'),
                 ]);
 
                 Notification::make()
