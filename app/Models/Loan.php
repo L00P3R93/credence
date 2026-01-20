@@ -91,6 +91,11 @@ class Loan extends Model implements HasMedia
         return $this->hasMany(Payment::class);
     }
 
+    public function refinances(): HasMany
+    {
+        return $this->hasMany(Refinance::class);
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('loan-documents')
@@ -202,6 +207,14 @@ class Loan extends Model implements HasMedia
     public function loanBalance(): float
     {
         return $this->loan_balance = $this->loan_total - $this->payments()->sum('amount');
+    }
+
+    public function isEligibleForRefinance(): bool
+    {
+        $loanBalance = $this->loanBalance();
+        $customer = $this->customer;
+        $refinanceAmount = $customer->loan_limit - $loanBalance;
+        return $refinanceAmount >= 1000;
     }
 
 }

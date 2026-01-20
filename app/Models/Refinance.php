@@ -13,6 +13,8 @@ class Refinance extends Model
     /** @use HasFactory<\Database\Factories\RefinanceFactory> */
     use HasFactory, Auditable;
 
+    protected $table = 'refinances';
+
     protected function casts(): array
     {
         return [
