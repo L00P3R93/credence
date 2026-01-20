@@ -3,9 +3,11 @@
 namespace App\Filament\Resources\Loans\Actions;
 
 use App\Enums\LoanStatus;
+use App\Filament\Resources\Refinances\Schemas\RefinanceForm;
 use App\Models\Loan;
 use App\Models\Refinance;
 use Filament\Actions\Action;
+use Filament\Schemas\Schema;
 
 class RefinanceLoanAction extends Action
 {
@@ -21,18 +23,24 @@ class RefinanceLoanAction extends Action
         $this
             ->label('Refinance Loan')
             ->color('purple')
-            ->icon('heroicon-o-wrench')
-            ->schema([
-                //TODO: Add Refinance Form
-            ])
+            ->icon('hugeicons-move-top')
+            ->schema(fn (Loan $loan) => RefinanceForm::getFormSchema($loan))
             ->requiresConfirmation()
+            ->modalHeading('Refinance Loan')
+            ->modalDescription('Please confirm the refinance amount and details.')
+            ->modalIcon('hugeicons-move-top')
+            ->modalSubmitActionLabel('Refinance Loan')
             ->visible(fn (?Loan $loan) => $loan && in_array($loan->status, [LoanStatus::DISBURSED, LoanStatus::OVERDUE]) && $loan->isEligibleForRefinance())
-            ->action(function (Loan $loan) {
+            ->action(function (Loan $loan, array $data) {
                 //TODO: 1. Check if Customer is eligible for refinance
                 //TODO: 2. Clear Old Loan and add remark 'Loan cleared due to refinance by {loggedIn User} on {timestamp}'
                 //TODO: 3. Create a new loan with new loan amount, with remark 'Loan refinance of {refinance amount} created by {loggedIn User} on {timestamp}<br>Previous Principal: {previous principal}, New Loan: {new loan amount}, Interest: {}'
                 //TODO: 4. Create the refinance
+                try {
 
+                } catch (\Exception $e) {
+
+                }
             });
     }
 }

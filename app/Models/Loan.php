@@ -217,4 +217,12 @@ class Loan extends Model implements HasMedia
         return $refinanceAmount >= 1000;
     }
 
+    public function refinanceAmount(): float
+    {
+        $loanBalance = $this->loanBalance();
+        $customer = $this->customer;
+        $refinanceAmount = $customer->loan_limit - $loanBalance;
+        return max(1000, $refinanceAmount);
+    }
+
 }

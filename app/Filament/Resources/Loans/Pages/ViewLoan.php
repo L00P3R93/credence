@@ -7,6 +7,7 @@ use App\Filament\Resources\Loans\Actions\ClearLoanAction;
 use App\Filament\Resources\Loans\Actions\ConfirmLoanAction;
 use App\Filament\Resources\Loans\Actions\DisburseLoanAction;
 use App\Filament\Resources\Loans\Actions\MarkDisbursedAction;
+use App\Filament\Resources\Loans\Actions\RefinanceLoanAction;
 use App\Filament\Resources\Loans\Actions\VerifyLoanAction;
 use App\Filament\Resources\Loans\LoanResource;
 use Filament\Actions\EditAction;
@@ -25,6 +26,7 @@ class ViewLoan extends ViewRecord
             DisburseLoanAction::make('disburse_loan'),
             MarkDisbursedAction::make('mark_disbursed'),
             ClearLoanAction::make('clear_loan'),
+            RefinanceLoanAction::make('refinance_loan'),
             EditAction::make(),
         ];
     }

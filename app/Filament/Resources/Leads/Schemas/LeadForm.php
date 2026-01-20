@@ -39,7 +39,7 @@ class LeadForm
                 TextInput::make('phone')
                     ->label('Primary Phone Number')
                     ->tel()
-                    ->unique(ignoreRecord: false)
+                    ->unique(ignoreRecord: true)
                     ->telRegex('/^(?:\+254|254|0)(7\d{8}|1\d{8})$/')
                     ->prefixIcon(FaIcon::PHONE_SQUARE)
                     ->prefixIconColor('primary')
@@ -67,7 +67,7 @@ class LeadForm
                 TextInput::make('work_email')
                     ->label('Work Email address')
                     ->email()
-                    ->unique(ignoreRecord: false)
+                    ->unique(ignoreRecord: true)
                     ->prefixIcon(Heroicon::AtSymbol)
                     ->prefixIconColor('primary')
                     ->validationMessages([
@@ -227,12 +227,10 @@ class LeadForm
                     ->label('Added By')
                     ->prefixIcon(FaIcon::USER)
                     ->prefixIconColor('primary')
-                    ->relationship('user', 'name', fn (Builder $query) => $query->whereHas('roles', function($q) {
-                            $q->whereIn('name', ['Admin', 'Sales Officer']);
-                        })->orderBy('name')->limit(10))
+                    ->relationship('user', 'name', fn (Builder $query) => $query->whereHas('roles')->orderBy('name')->limit(10))
                     ->native(false)
                     ->searchable()
-                    ->preload()
+                    ->default(auth()->user()->id)
                     ->required(),
             ])->columns(2)->columnSpanFull()->visible(fn () => auth()->user()->isAdmin()),
         ]);

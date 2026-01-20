@@ -136,7 +136,8 @@ class DatabaseSeeder extends Seeder
 
                 // Loans
                 'view_loans', 'view_loan', 'create_loan', 'update_loan', 'verify_loan', 'confirm_loan', 'approve_loan', 'disburse_loan',
-                'clear_loan', 'mark_as_disbursed', 'mark_as_overdue', 'mark_as_default', 'mark_as_written_off',
+                'clear_loan', 'mark_as_disbursed', 'mark_as_overdue', 'mark_as_default', 'mark_as_written_off','refinance_loan',
+                'view_refinances', 'view_refinance', 'create_refinance', 'update_refinance', 'delete_refinance',
 
                 // Penalties
                 'view_penalties', 'view_penalty', 'create_penalty', 'update_penalty', 'delete_penalty',

@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(\App\Models\Lead::class)->nullable()->constrained()->cascadeOnDelete();
             $table->string('name')->index();
-            $table->string('id_no')->unique()->index();
+            $table->string('id_no')->nullable()->unique()->index();
             $table->string('phone')->unique()->index();
             $table->string('phone_alt')->nullable();
             $table->string('gender')->default('m');
-            $table->date('dob');
-            $table->string('work_email')->unique()->index();
-            $table->string('personal_email')->unique()->index();
+            $table->date('dob')->nullable();
+            $table->string('work_email')->nullable()->unique()->index();
+            $table->string('personal_email')->nullable()->unique()->index();
             $table->string('status')->default('active');
             $table->decimal('loan_limit', 10, 2)->default(0);
             $table->text('comments')->nullable();
