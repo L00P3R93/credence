@@ -166,3 +166,18 @@ Customer / Loan ──► Product
 Loan ──► User (sales_agent, temp_agent, collection_agent, collection_officer)
 All models ──► AuditLog
 ```
+## Git Workflow
+- NEVER commit automatically
+- NEVER create pull requests automatically
+- NEVER run `git commit` or `gh pr create` without my explicit instruction
+- Only stage and commit when I say "commit this" or "create a PR"
+- Always show me the diff before any git operation
+```
+
+## 💡 Recommended Workflow for Laravel Projects
+```
+1. Ask Claude to make changes
+2. Review diffs in PhpStorm diff viewer
+3. Test locally (php artisan test)
+4. Then manually tell Claude: "commit and push"
+5. Then separately: "open a PR to main"

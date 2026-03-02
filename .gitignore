@@ -31,3 +31,4 @@ auth.json
 
 # Claude Code
 .claude/worktrees/
+.claude/settings.local.json
