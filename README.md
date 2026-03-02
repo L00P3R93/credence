@@ -1,4 +1,5 @@
 # CR3D3NC3
+<<<<<<< Updated upstream
 
 A comprehensive CRM & Credit Lending Management System built with **Laravel 12** and **FilamentPHP 4**. CR3D3NC3 manages the full lifecycle of a loan — from lead capture and customer onboarding through disbursement, repayment tracking, refinancing, and collections.
 
@@ -334,3 +335,8 @@ Code style:
 ## License
 
 This project is proprietary software. All rights reserved.
+=======
+`Clean, symmetrical, professional`
+
+CRM & Credit Lending Management System made with Laravel 12 and FilamentPHP 4
+>>>>>>> Stashed changes
