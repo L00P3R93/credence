@@ -3,11 +3,15 @@
 namespace App\Filament\Resources\Loans\Actions;
 
 use App\Enums\LoanStatus;
+use App\Filament\Resources\Loans\LoanResource;
 use App\Filament\Resources\Refinances\Schemas\RefinanceForm;
 use App\Models\Loan;
 use App\Models\Refinance;
+use App\Services\LoanService;
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Log;
 
 class RefinanceLoanAction extends Action
 {
@@ -32,14 +36,27 @@ class RefinanceLoanAction extends Action
             ->modalSubmitActionLabel('Refinance Loan')
             ->visible(fn (?Loan $loan) => $loan && in_array($loan->status, [LoanStatus::DISBURSED, LoanStatus::OVERDUE]) && $loan->isEligibleForRefinance())
             ->action(function (Loan $loan, array $data) {
-                //TODO: 1. Check if Customer is eligible for refinance
-                //TODO: 2. Clear Old Loan and add remark 'Loan cleared due to refinance by {loggedIn User} on {timestamp}'
-                //TODO: 3. Create a new loan with new loan amount, with remark 'Loan refinance of {refinance amount} created by {loggedIn User} on {timestamp}<br>Previous Principal: {previous principal}, New Loan: {new loan amount}, Interest: {}'
-                //TODO: 4. Create the refinance
                 try {
+                    $loanService = app(LoanService::class);
+                    $result = $loanService->processRefinance($loan, $data['amount'], auth()->user());
 
+                    if ($result['success']) {
+                        Notification::make()
+                            ->title('Loan Refinanced Successfully')
+                            ->body('Loan has been refinanced successfully. Old Loan marked cleared.')
+                            ->success()
+                            ->send();
+
+                        // Redirect to the new loan view page
+                        $this->redirect(LoanResource::getUrl('view', ['record' => $result['new_loan']->id]));
+                    }
                 } catch (\Exception $e) {
-
+                    Log::error("Error Creating Refinance: {$e->getMessage()}");
+                    Notification::make()
+                        ->title('Loan Refinancing Failed')
+                        ->body("Error: {$e->getMessage()}")
+                        ->danger()
+                        ->send();
                 }
             });
     }

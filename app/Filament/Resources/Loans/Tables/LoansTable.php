@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Loans\Tables;
 use App\Enums\CustomerStatus;
 use App\Enums\LoanStatus;
 use App\Models\Loan;
+use App\Scopes\ActiveLoanScope;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -26,9 +27,12 @@ class LoansTable
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
+                $query->withoutGlobalScope(ActiveLoanScope::class);
                 auth()->user()->isAdmin()
                     ? $query->with('customer')
-                    : $query->where('agent', auth()->id())->orWhere('temp_agent', auth()->id());
+                    : $query->where(function (Builder $q) {
+                        $q->where('agent', auth()->id())->orWhere('temp_agent', auth()->id());
+                    });
             })
             ->defaultSort('id', 'desc')
             ->columns([

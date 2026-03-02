@@ -23,7 +23,8 @@ return new class extends Migration
             $table->integer('loan_period')->default(1);
             $table->boolean('new_loan')->default(false);
             $table->boolean('old_loan')->default(false);
-            $table->boolean('top_up')->default(false);
+            $table->integer('top_up')->default(0);
+            $table->boolean('is_from_top_up')->default(false);
             $table->foreignId('agent')->constrained('users')->cascadeOnDelete();
             $table->foreignId('temp_agent')->nullable()->constrained('users')->cascadeOnDelete();
             $table->string('status')->default('pending_verification'); // pending_verification, pending_confirmation, pending_approval, pending_disbursement, disbursed, overdue, past_overdue, canceled, written_off, fraud, deleted
@@ -33,6 +34,8 @@ return new class extends Migration
             $table->foreignIdFor(\App\Models\Product::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(\App\Models\Bank::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(\App\Models\BankBranch::class)->constrained()->cascadeOnDelete();
+            $table->boolean('rolled')->default(false);
+            $table->boolean('due_roll')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

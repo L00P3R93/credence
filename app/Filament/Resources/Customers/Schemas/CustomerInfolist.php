@@ -27,10 +27,10 @@ class CustomerInfolist
                     // Left Column - Profile Photo with Card
                     Group::make()->schema([
                         Section::make()->schema([
-                            ImageEntry::make('profile-photo')
+                            ImageEntry::make('profiles')
                                 ->label('Customer Photo')
                                 ->circular()
-                                ->getStateUsing(fn ($record) => $record->getFirstMediaUrl('profile-photo'))
+                                ->getStateUsing(fn ($record) => $record->getFirstMediaUrl('profiles'))
                                 ->defaultImageUrl(url('/images/avatar.png'))
                                 ->extraAttributes(['class' => 'mx-auto mb-4']),
 

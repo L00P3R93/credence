@@ -68,7 +68,7 @@ class Customer extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('profile-photo')
+        $this->addMediaCollection('profiles')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/jpg'])
             ->useDisk('public')
             ->singleFile();

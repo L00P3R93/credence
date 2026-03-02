@@ -24,6 +24,8 @@ enum LoanStatus: string implements HasLabel, HasIcon, HasColor
     case DELETED = 'deleted';
     case CLEARED = 'cleared';
 
+    case DUE_ROLL = 'due_roll';
+
 	public function getLabel(): string
 	{
         return match ($this) {
@@ -39,6 +41,7 @@ enum LoanStatus: string implements HasLabel, HasIcon, HasColor
             self::FRAUD => 'Fraud',
             self::DELETED => 'Deleted',
             self::CLEARED => 'Cleared',
+            self::DUE_ROLL => 'Due Roll',
 
         };
 	}
@@ -54,10 +57,11 @@ enum LoanStatus: string implements HasLabel, HasIcon, HasColor
             self::OVERDUE => 'warning',
             self::PAST_OVERDUE => 'danger',
             self::CANCELED, self::WRITTEN_OFF, self::FRAUD, self::DELETED, self::CLEARED => 'gray',
+            self::DUE_ROLL => 'cyan',
         };
     }
 
-    public function getIcon(): BackedEnum
+    public function getIcon(): BackedEnum|string
     {
         return match ($this) {
             self::PENDING_VERIFICATION, self::PENDING_CONFIRMATION, self::PENDING_APPROVAL, self::PENDING_DISBURSEMENT => Heroicon::OutlinedClock,
@@ -67,6 +71,7 @@ enum LoanStatus: string implements HasLabel, HasIcon, HasColor
             self::WRITTEN_OFF, self::FRAUD => Heroicon::OutlinedShieldExclamation,
             self::DELETED => Heroicon::OutlinedTrash,
             self::CLEARED => Heroicon::OutlinedCheckCircle,
+            self::DUE_ROLL => 'hugeicons-calendar-check-out-01',
         };
     }
 }

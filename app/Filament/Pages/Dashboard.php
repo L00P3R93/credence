@@ -2,6 +2,10 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\CollectionsStatsWidget;
+use App\Filament\Widgets\CurrentMonthStatsWidget;
+use App\Filament\Widgets\LoanOperationsWidget;
+use App\Filament\Widgets\NextMonthStatsWidget;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Dashboard as BaseDashboard;
@@ -13,6 +17,7 @@ class Dashboard extends BaseDashboard
 {
     use BaseDashboard\Concerns\HasFiltersForm;
 
+    
     public function filtersForm(Schema $schema): Schema
     {
         return $schema->columns([

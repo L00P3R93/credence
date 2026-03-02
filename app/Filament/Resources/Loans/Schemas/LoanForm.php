@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Loans\Schemas;
 use App\Enums\LoanStatus;
 use App\Models\Customer;
 use App\Models\Loan;
+use App\Models\Product;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
@@ -13,8 +14,10 @@ use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class LoanForm
 {
@@ -38,38 +41,48 @@ class LoanForm
                     Select::make('customer_id')
                         ->label('Customer')
                         ->relationship('customer', 'name')
-                        ->disabled()
+                        ->native(false)
+                        ->searchable()
+                        ->required()
                         ->default($customerId),
                     Select::make('product_id')
                         ->label('Loan Product')
                         ->relationship('product', 'name')
-                        ->disabled()
+                        ->required()
+                        ->searchable()
+                        ->preload()
+                        ->native(false)
+                        ->live() // Reactive on change
+                        ->afterStateUpdated(function (Get $get, Set $set) {
+                            self::updateInterestRate($get, $set);
+                            self::calculateTotals($get, $set);
+                        })
+                        ->afterStateHydrated(function (Get $get, Set $set) {
+                            self::updateInterestRate($get, $set);
+                            self::calculateTotals($get, $set);
+                        })
                         ->default($productId),
                     Select::make('bank_id')
                         ->label('Bank')
                         ->relationship('bank', 'name')
-                        ->disabled()
+                        ->required()
+                        ->searchable()
+                        ->preload()
+                        ->native(false)
                         ->default($bankId),
                     Select::make('bank_branch_id')
                         ->label('Bank Branch')
                         ->relationship('bankBranch', 'name')
-                        ->disabled()
+                        ->required()
+                        ->searchable()
+                        ->preload()
+                        ->native(false)
                         ->default($bankBranchId),
                     TextInput::make('loan_limit')
                         ->label('Loan Limit')
                         ->numeric()
                         ->disabled()
                         ->default($loanLimit),
-
-
-                    Hidden::make('customer_id')
-                        ->default($customerId),
-                    Hidden::make('product_id')
-                        ->default($productId),
-                    Hidden::make('bank_id')
-                        ->default($bankId),
-                    Hidden::make('bank_branch_id')
-                        ->default($bankBranchId),
                 ])->columns(2)->columnSpanFull(),
 
                 Section::make('Loan Details')->schema([
@@ -78,7 +91,15 @@ class LoanForm
                         ->numeric()
                         ->minValue(0)
                         ->maxValue(fn (Get $get) => $get('loan_limit'))
-                        ->reactive()
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function (Get $get, Set $set) {
+                            self::calculateTotals($get, $set);
+                        })
+                        ->afterStateHydrated(function (Get $get, Set $set) {
+                            if ($get('loan_amount')) {
+                                self::calculateTotals($get, $set);
+                            }
+                        })
                         ->rules([
                             'required',
                             'numeric',
@@ -89,32 +110,37 @@ class LoanForm
                             'min' => 'Loan amount cannot be less than 5000',
                             'required' => 'Loan amount is required',
                             'numeric' => 'Loan amount must be a number',
-                        ])
-                        ->dehydrateStateUsing(fn ($state) => (float) $state),
+                        ]),
+                    TextInput::make('interest_rate')
+                        ->required()
+                        ->numeric()
+                        ->suffix('%')
+                        ->disabled() // Auto-set from product
+                        ->readOnly()
+                        ->dehydrated(true) // Still save to database
+                        ->live()
+                        ->afterStateUpdated(function (Get $get, Set $set) {
+                            self::calculateTotals($get, $set);
+                        })
+                        // ✅ Calculate when rate is hydrated (for edit mode)
+                        ->afterStateHydrated(function (Get $get, Set $set) {
+                            if ($get('interest_rate') && $get('loan_amount')) {
+                                self::calculateTotals($get, $set);
+                            }
+                        }),
                     Select::make('loan_period')
                         ->options($loanPeriod)
                         ->native(false)
                         ->searchable()
                         ->required()
-                        ->default(1),
-
-                    Toggle::make('this_due')
-                        ->label('Due This Month')
-                        ->default(true) // Default to this month
-                        ->reactive()
-                        ->afterStateUpdated(function (callable $get, callable $set) {
-                            if ($get('this_due')) {
-                                $set('next_due', false);
-                            }
-                        }),
-
-                    Toggle::make('next_due')
-                        ->label('Due Next Month')
-                        ->default(false)
-                        ->reactive()
-                        ->afterStateUpdated(function (callable $get, callable $set) {
-                            if ($get('next_due')) {
-                                $set('this_due', false);
+                        ->default(1)
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function (Set $set, Get $get) {
+                            self::calculateTotals($get, $set);
+                        })
+                        ->afterStateHydrated(function (Get $get, Set $set) {
+                            if ($get('loan_period')) {
+                                self::calculateTotals($get, $set);
                             }
                         }),
 
@@ -138,40 +164,109 @@ class LoanForm
                         ->hidden(fn () => $customer?->loans?->whereNotIn('status', ['cancelled', 'deleted'])->count() <= 0)
                         ->required(),
                 ])->columns(2)->columnSpanFull(),
+                Section::make('Loan Dates')->schema([
+                    Toggle::make('this_due')
+                        ->label('Due This Month')
+                        ->live(),
 
-                Section::make('Loan Edit')->schema([
+                    Toggle::make('next_due')
+                        ->label('Due Next Month')
+                        ->live()
+                    ,
                     DatePicker::make('given_date')
                         ->native(false)
                         ->required(),
                     DatePicker::make('due_date')
                         ->native(false)
-                        ->required(),
+                        ->required()
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function (Get $get, Set $set) {
+                            self::updateDueToggles($get, $set);
+                        })
+                        ->afterStateHydrated(function (Get $get, Set $set) {
+                            self::updateDueToggles($get, $set);
+                        })
+                        ->default(now()->addMonth()),
+                ])->columns(2)->columnSpanFull(),
+                Section::make('Calculated Fields')->schema([
+
                     TextInput::make('loan_interest')
                         ->required()
                         ->numeric()
-                        ->default(0.0)
-                        ->step(500)
-                    ->minValue(0)
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set, $get){
-                        $loan_amount = (float) $get('loan_amount');
-                        $loan_interest = (float) $state;
-                        $loan_period = (int) $get('loan_period');
-                        $processing_fee = round($loan_amount * 0.05);
-                        $installment = round($loan_amount / $loan_period);
-                        $loan_total = $installment * $loan_period;
-                        $set('loan_total', $loan_total);
-                        $set('processing_fee', $processing_fee);
-                    }),
+                        ->prefix('KES')
+                        ->live(),
                     TextInput::make('processing_fee')
                         ->required()
                         ->numeric()
-                        ->default(0.0),
+                        ->prefix('KES')
+                        ->live(),
                     TextInput::make('loan_total')
                         ->required()
                         ->numeric()
-                        ->default(0.0),
+                        ->prefix('KES')
+                        ->live(),
                 ])->visible(fn (?Loan $record) => $record !== null)->columns(2)->columnSpanFull()
             ]);
+    }
+
+    /**
+     * Fetch and set interest rate from selected product
+     */
+    private static function updateInterestRate(Get $get, Set $set): void
+    {
+        $productId = $get('product_id');
+
+        if (!$productId) {
+            $set('interest_rate', null);
+            return;
+        }
+
+        $product = Product::find($productId);
+
+        if ($product && $product->rate) {
+            $set('interest_rate', $product->rate * 100);
+        }
+    }
+
+    /**
+     * Calculate loan_interest, processing_fee, and loan_total
+     */
+    private static function calculateTotals(Get $get, Set $set): void
+    {
+        $amount = floatval($get('loan_amount') ?? 0);
+        $period = intval($get('loan_period') ?? 1);
+        $rate = floatval($get('interest_rate') ?? 0);
+
+        // Interest = (Amount × Rate% × Period) / 100
+        $interest = ($amount * $rate * $period) / 100;
+
+        // Processing fee: 2% of amount (or from product if available)
+        $processingFee = $amount * 0.02;
+
+        // Total = Principal + Interest + Processing Fee
+        $total = $amount + $interest;
+
+        $set('loan_interest', round($interest, 2));
+        $set('processing_fee', round($processingFee, 2));
+        $set('loan_total', round($total, 2));
+    }
+
+    /**
+     * Update this_due and next_due toggles based on due_date
+     */
+    private static function updateDueToggles(Get $get, Set $set): void
+    {
+        $dueDate = $get('due_date');
+
+        if (!$dueDate) {
+            $set('this_due', false);
+            $set('next_due', false);
+            return;
+        }
+
+        $due = Carbon::parse($dueDate);
+
+        $set('this_due', $due->isCurrentMonth());
+        $set('next_due', $due->isNextMonth());
     }
 }

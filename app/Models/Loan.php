@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Enums\LoanStatus;
+use App\Scopes\ActiveLoanScope;
 use App\Traits\Auditable;
 use Carbon\CarbonInterface;
+use Carbon\Constants\UnitValue;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Filament\Support\Concerns\HasMediaFilter;
@@ -165,10 +167,10 @@ class Loan extends Model implements HasMedia
 
     private function loan_total(): float
     {
-        return $this->installment() * $this->loan_period;
+        return $this->loan_amount + $this->loan_interest;
     }
 
-    private function loan_due_date($next_due = false, $this_due = false, $dd = 0)
+    private function loan_due_date($next_due = false, $this_due = false, $dd = 0): ?CarbonInterface
     {
         // Get today's date or use provided day
         $today = $dd > 0 ? $dd : now()->day;
@@ -181,11 +183,11 @@ class Loan extends Model implements HasMedia
         // Adjust payday for weekends
         $payDate = now()->setDay($payday);
         $payDayOfWeek = $payDate->dayOfWeek;
-        if($payDayOfWeek == CarbonInterface::SATURDAY) {
+        if($payDayOfWeek == UnitValue::SATURDAY) {
             $realPayday = $payday + ($weekendPushes == 0 ? -1 : 1);
-        } elseif ($payDayOfWeek == CarbonInterface::SUNDAY) {
+        } elseif ($payDayOfWeek == UnitValue::SUNDAY) {
             $realPayday = $payday + ($weekendPushes == 0 ? -2 : 1);
-        } elseif ($payDayOfWeek === CarbonInterface::MONDAY && $bank->id == 4) {
+        } elseif ($payDayOfWeek === UnitValue::MONDAY && $bank->id == 4) {
             $realPayday = $payday - 3;
         } else {
             $realPayday = $payday;
@@ -206,7 +208,13 @@ class Loan extends Model implements HasMedia
 
     public function loanBalance(): float
     {
-        return $this->loan_balance = $this->loan_total - $this->payments()->sum('amount');
+        return $this->loan_total - $this->payments()->sum('amount');
+    }
+
+    public function principalBalance(): float
+    {
+        $totalPaid = $this->payments()->sum('amount');
+        return ($totalPaid > $this->loan_interest) ? $this->loan_amount - ($totalPaid - $this->loan_interest) : $this->loan_amount;
     }
 
     public function isEligibleForRefinance(): bool
@@ -214,6 +222,10 @@ class Loan extends Model implements HasMedia
         $loanBalance = $this->loanBalance();
         $customer = $this->customer;
         $refinanceAmount = $customer->loan_limit - $loanBalance;
+        // If customer has not reduced principal or made any payments
+        if ($loanBalance >= ($this->loan_amount + $this->loan_interest)) {
+            $refinanceAmount = $customer->loan_limit - $this->loan_amount;
+        }
         return $refinanceAmount >= 1000;
     }
 
@@ -222,7 +234,17 @@ class Loan extends Model implements HasMedia
         $loanBalance = $this->loanBalance();
         $customer = $this->customer;
         $refinanceAmount = $customer->loan_limit - $loanBalance;
+        // If customer has not reduced principal or made any payments
+        if ($loanBalance >= ($this->loan_amount + $this->loan_interest)) {
+            $refinanceAmount = $customer->loan_limit - $this->loan_amount;
+        }
+
         return max(1000, $refinanceAmount);
     }
+
+    // protected static function booted(): void
+    // {
+    //     static::addGlobalScope(new ActiveLoanScope());
+    // }
 
 }
