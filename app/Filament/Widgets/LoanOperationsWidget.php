@@ -23,17 +23,17 @@ class LoanOperationsWidget extends BaseWidget
                 ->color('info')
                 ->chart([12, 15, 18, 14, 20, 16, 22]),
 
+            Stat::make('Old Loans', 'KES ' . number_format($stats['oldLoansThisMonth']))
+                ->description('Total topped up amounts')
+                ->descriptionIcon('heroicon-o-arrow-trending-up')
+                ->color('warning')
+                ->chart([8, 12, 10, 14, 11, 15, 13]),
+
             Stat::make('Top-Ups', number_format($stats['totalTopUpThisMonth']))
                 ->description('Number of top-ups')
                 ->descriptionIcon('heroicon-o-arrow-up-circle')
                 ->color('success')
                 ->chart([3, 5, 4, 6, 7, 5, 8]),
-
-            Stat::make('Topped Amounts', 'KES ' . number_format($stats['toppedAmount']))
-                ->description('Total topped up amounts')
-                ->descriptionIcon('heroicon-o-arrow-trending-up')
-                ->color('warning')
-                ->chart([8, 12, 10, 14, 11, 15, 13]),
 
             Stat::make('Amount Rolled', 'KES ' . number_format($stats['totalRolledThisMonth']))
                 ->description('Total rolled over amounts')
