@@ -18,25 +18,25 @@ class NextMonthStatsWidget extends BaseWidget
         $stats = $statsService->getNextMonthStats();
 
         return [
-            Stat::make('New Loans Next Month', 'KES ' . number_format($stats['newLoansNextMonth'], 2))
+            Stat::make('New Loans Next Month', 'KES ' . number_format($stats['newLoansNextMonth']))
                 ->description('Projected new loans')
                 ->descriptionIcon('heroicon-o-calendar-days')
                 ->color('danger')
                 ->chart([15, 18, 20, 16, 22, 18, 24]),
 
-            Stat::make('Top-Ups Next Month', 'KES ' . number_format($stats['totalTopUpForNextMonth'], 2))
+            Stat::make('Top-Ups Next Month', 'KES ' . number_format($stats['totalTopUpForNextMonth']))
                 ->description('Projected top-ups')
                 ->descriptionIcon('heroicon-o-arrow-up')
                 ->color('primary')
                 ->chart([5, 7, 6, 8, 7, 9, 8]),
 
-            Stat::make('Topped Amounts Next Month', 'KES ' . number_format($stats['toppedAmountForNextMonth'], 2))
+            Stat::make('Topped Amounts Next Month', 'KES ' . number_format($stats['toppedAmountForNextMonth']))
                 ->description('Projected topped amounts')
                 ->descriptionIcon('heroicon-o-banknotes')
                 ->color('success')
                 ->chart([10, 14, 12, 16, 13, 17, 15]),
 
-            Stat::make('Due Roll Next Month', 'KES ' . number_format($stats['dueRollForNextMonth'], 2))
+            Stat::make('Due Roll Next Month', 'KES ' . number_format($stats['dueRollForNextMonth']))
                 ->description('Loans due for rollover')
                 ->descriptionIcon(Heroicon::OutlinedArrowUpOnSquareStack)
                 ->color('gray')

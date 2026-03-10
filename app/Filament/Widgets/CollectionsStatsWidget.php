@@ -17,13 +17,13 @@ class CollectionsStatsWidget extends BaseWidget
         $stats = $statsService->getCollectionsStats();
 
         return [
-            Stat::make('Collected This Month', 'KES ' . number_format($stats['collectedThisMonth'], 2))
+            Stat::make('Collected This Month', 'KES ' . number_format($stats['collectedThisMonth']))
                 ->description('Total collections this month')
                 ->descriptionIcon('heroicon-o-currency-dollar')
                 ->color('success')
                 ->chart([20, 25, 22, 28, 24, 30, 26]),
 
-            Stat::make('Collected Next Month', 'KES ' . number_format($stats['collectedNextMonth'], 2))
+            Stat::make('Collected Next Month', 'KES ' . number_format($stats['collectedNextMonth']))
                 ->description('Projected collections next month')
                 ->descriptionIcon('heroicon-o-currency-dollar')
                 ->color('info')

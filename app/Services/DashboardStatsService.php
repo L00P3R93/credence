@@ -67,16 +67,18 @@ class DashboardStatsService
     private function getMonthlyLoanBookTotal(): float
     {
         return Loan::withGlobalScope('active_loan', new \App\Scopes\ActiveLoanScope())
-            ->where('given_date', '>=', Carbon::now()->startOfMonth())
-            ->where('given_date', '<=', Carbon::now()->endOfMonth())
+            ->where('due_date', '>=', Carbon::now()->startOfMonth())
+            ->where('due_date', '<=', Carbon::now()->endOfMonth())
+            ->whereIn('top_up', [0,2])
             ->sum('loan_amount');
     }
 
     private function getMonthlyLoanInterest(): float
     {
         return Loan::withGlobalScope('active_loan', new \App\Scopes\ActiveLoanScope())
-            ->where('given_date', '>=', Carbon::now()->startOfMonth())
-            ->where('given_date', '<=', Carbon::now()->endOfMonth())
+            ->where('due_date', '>=', Carbon::now()->startOfMonth())
+            ->where('due_date', '<=', Carbon::now()->endOfMonth())
+            ->whereIn('top_up', [0,2])
             ->sum('loan_interest');
     }
 
@@ -91,15 +93,15 @@ class DashboardStatsService
     {
         return Loan::withGlobalScope('active_loan', new \App\Scopes\ActiveLoanScope())
             ->where('new_loan', true)
-            ->where('given_date', '>=', $startDate)
-            ->where('given_date', '<=', $endDate)
+            ->where('due_date', '>=', $startDate)
+            ->where('due_date', '<=', $endDate)
             ->sum('loan_amount');
     }
 
     private function getTotalTopUpThisMonth(Carbon $startDate, Carbon $endDate): float
     {
         $loanIds = Loan::withGlobalScope('active_loan', new \App\Scopes\ActiveLoanScope())
-            ->where('top_up', true)
+            ->where('is_from_top_up', true)
             ->where('due_date', '>=', $startDate)
             ->where('due_date', '<=', $endDate)
             ->pluck('id');
@@ -119,15 +121,16 @@ class DashboardStatsService
     private function getTotalRolledThisMonth(Carbon $startDate, Carbon $endDate): float
     {
         return Loan::withGlobalScope('active_loan', new \App\Scopes\ActiveLoanScope())
-            ->where('old_loan', true)
-            ->where('given_date', '>=', $startDate)
-            ->where('given_date', '<=', $endDate)
+            ->where('rolled', true)
+            ->where('due_date', '>=', $startDate)
+            ->where('due_date', '<=', $endDate)
             ->sum('loan_amount');
     }
 
     private function getDueRollForNextMonth(Carbon $startDate, Carbon $endDate): float
     {
         return Loan::withGlobalScope('active_loan', new \App\Scopes\ActiveLoanScope())
+            ->where('due_roll', true)
             ->where('due_date', '>=', $startDate)
             ->where('due_date', '<=', $endDate)
             ->sum('loan_amount');
