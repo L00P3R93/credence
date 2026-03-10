@@ -24,8 +24,8 @@ class DashboardStatsService
             'todaySales' => $this->getTodaySales(),
             'newLoansThisMonth' => $this->getNewLoansThisMonth($startOfMonth, $endOfMonth),
             'totalTopUpThisMonth' => $this->getTotalTopUpThisMonth($startOfMonth, $endOfMonth),
-            'toppedAmount' => $this->getToppedAmount($startOfMonth, $endOfMonth),
-            'totalRolledThisMonth' => $this->getTotalRolledThisMonth($startOfMonth, $endOfMonth),
+            'oldLoansThisMonth' => $this->getOldLoansThisMonth($startOfMonth, $endOfMonth),
+            'totalRolledThisMonth' => $this->getToppedAmount($startOfMonth, $endOfMonth),
         ];
     }
 
@@ -107,22 +107,38 @@ class DashboardStatsService
         return Refinance::whereIn('loan_id', $loanIds)->sum('amount');
     }
 
-    private function getToppedAmount(Carbon $startDate, Carbon $endDate): float
-    {
-        return Loan::withGlobalScope('active_loan', new \App\Scopes\ActiveLoanScope())
-            ->where('top_up', true)
-            ->where('given_date', '>=', $startDate)
-            ->where('given_date', '<=', $endDate)
-            ->sum('loan_amount');
-    }
-
-    private function getTotalRolledThisMonth(Carbon $startDate, Carbon $endDate): float
+    private function getOldLoansThisMonth(Carbon $startDate, Carbon $endDate): float
     {
         return Loan::withGlobalScope('active_loan', new \App\Scopes\ActiveLoanScope())
             ->where('old_loan', true)
             ->where('given_date', '>=', $startDate)
             ->where('given_date', '<=', $endDate)
             ->sum('loan_amount');
+    }
+
+    /**
+     * Topped amount = the principal balance carried over before a top-up/refinance.
+     * Formula: loan_book − (new_loans + old_loans + refinances)
+     */
+    private function getToppedAmount(Carbon $startDate, Carbon $endDate): float
+    {
+        $loanBook = $this->getMonthlyLoanBookTotal();
+
+        $newLoans = Loan::withGlobalScope('active_loan', new \App\Scopes\ActiveLoanScope())
+            ->where('new_loan', true)
+            ->where('given_date', '>=', $startDate)
+            ->where('given_date', '<=', $endDate)
+            ->sum('loan_amount');
+
+        $oldLoans = Loan::withGlobalScope('active_loan', new \App\Scopes\ActiveLoanScope())
+            ->where('old_loan', true)
+            ->where('given_date', '>=', $startDate)
+            ->where('given_date', '<=', $endDate)
+            ->sum('loan_amount');
+
+        $refinances = $this->getTotalTopUpThisMonth($startDate, $endDate);
+
+        return $loanBook - ($newLoans + $oldLoans + $refinances);
     }
 
     private function getDueRollForNextMonth(Carbon $startDate, Carbon $endDate): float
