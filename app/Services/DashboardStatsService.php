@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Customer;
 use App\Models\Loan;
 use App\Models\Payment;
+use App\Models\Refinance;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -97,11 +98,13 @@ class DashboardStatsService
 
     private function getTotalTopUpThisMonth(Carbon $startDate, Carbon $endDate): float
     {
-        return Loan::withGlobalScope('active_loan', new \App\Scopes\ActiveLoanScope())
+        $loanIds = Loan::withGlobalScope('active_loan', new \App\Scopes\ActiveLoanScope())
             ->where('top_up', true)
-            ->where('given_date', '>=', $startDate)
-            ->where('given_date', '<=', $endDate)
-            ->count();
+            ->where('due_date', '>=', $startDate)
+            ->where('due_date', '<=', $endDate)
+            ->pluck('id');
+
+        return Refinance::whereIn('loan_id', $loanIds)->sum('amount');
     }
 
     private function getToppedAmount(Carbon $startDate, Carbon $endDate): float
