@@ -11,6 +11,7 @@ class CollectionsStatsWidget extends BaseWidget
     protected static ?int $sort = 4;
 
     protected ?string $heading = 'Collections Summary';
+    protected ?string $pollingInterval = '300s';
     protected function getStats(): array
     {
         $statsService = app(DashboardStatsService::class);

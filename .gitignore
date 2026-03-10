@@ -30,5 +30,7 @@ Homestead.json
 auth.json
 
 # Claude Code
+.claude/projects/
 .claude/worktrees/
 .claude/settings.local.json
+
