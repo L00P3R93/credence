@@ -30,6 +30,9 @@ class LoanForm
         $bankBranchId = $customer?->bank_branch_id;
         $loanLimit = $customer?->loan_limit;
 
+        $product = $productId ? Product::find($productId) : null;
+        $interestRate = $product ? $product->rate * 100 : null;
+
         $loanPeriod = [];
         // Loan Period array for 4 months
         for ($i = 1; $i <= 4; $i++) {
@@ -115,14 +118,14 @@ class LoanForm
                         ->required()
                         ->numeric()
                         ->suffix('%')
-                        ->disabled() // Auto-set from product
+                        ->disabled()
                         ->readOnly()
-                        ->dehydrated(true) // Still save to database
+                        ->dehydrated(false)
+                        ->default($interestRate)
                         ->live()
                         ->afterStateUpdated(function (Get $get, Set $set) {
                             self::calculateTotals($get, $set);
                         })
-                        // ✅ Calculate when rate is hydrated (for edit mode)
                         ->afterStateHydrated(function (Get $get, Set $set) {
                             if ($get('interest_rate') && $get('loan_amount')) {
                                 self::calculateTotals($get, $set);

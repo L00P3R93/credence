@@ -32,7 +32,6 @@ class CustomersTable
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('id_no')
-                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('phone')
                     ->searchable()
@@ -42,7 +41,6 @@ class CustomersTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('gender')
                     ->badge()
-                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('dob')
                     ->date()
@@ -54,18 +52,14 @@ class CustomersTable
                 TextColumn::make('personal_email')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('product.name')
-                    ->searchable(),
-                TextColumn::make('bank.name')
-                    ->searchable(),
-                TextColumn::make('bankBranch.name')
-                    ->searchable(),
+                TextColumn::make('product.name'),
+                TextColumn::make('bank.name'),
+                TextColumn::make('bankBranch.name'),
                 TextColumn::make('loan_limit')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('status')
-                    ->badge()
-                    ->searchable(),
+                    ->badge(),
                 IconColumn::make('has_loan')
                     ->boolean()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -74,7 +68,6 @@ class CustomersTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('user.name')
                     ->label('Added By')
-                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')

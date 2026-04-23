@@ -33,10 +33,10 @@ class CustomerForm
         return $schema
             ->components([
                 Section::make('Personal Details')->schema([
-                    SpatieMediaLibraryFileUpload::make('profile-photo')
+                    SpatieMediaLibraryFileUpload::make('profile_photo')
                         ->label('Customer Photo')
                         ->image()
-                        ->directory('customer/photos')
+                        ->disk('public')
                         ->collection('profiles')
                         ->preserveFilenames()
                         ->imageEditor()

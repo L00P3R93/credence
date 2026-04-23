@@ -12,13 +12,16 @@ use App\Filament\Resources\Customers\RelationManagers\MediaRelationManager;
 use App\Filament\Resources\Customers\Schemas\CustomerForm;
 use App\Filament\Resources\Customers\Schemas\CustomerInfolist;
 use App\Filament\Resources\Customers\Tables\CustomersTable;
+use App\Enums\LoanStatus;
 use App\Models\Customer;
+use App\Models\Loan;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use UnitEnum;
 
@@ -71,5 +74,55 @@ class CustomerResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'id_no', 'phone', 'phone_alt', 'work_email', 'personal_email'];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()
+            ->with(['bank', 'bankBranch'])
+            ->addSelect([
+                'customers.*',
+                'active_loan_status' => Loan::select('status')
+                    ->whereColumn('customer_id', 'customers.id')
+                    ->whereIn('status', [
+                        LoanStatus::DISBURSED->value,
+                        LoanStatus::OVERDUE->value,
+                        LoanStatus::PAST_OVERDUE->value,
+                        LoanStatus::DUE_ROLL->value,
+                    ])
+                    ->latest('id')
+                    ->limit(1),
+            ]);
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        assert($record instanceof Customer);
+
+        /** @var \App\Models\Bank|null $bank */
+        $bank = $record->bank;
+        /** @var \App\Models\BankBranch|null $branch */
+        $branch = $record->bankBranch;
+
+        $bankBranch = implode(' | ', array_filter([
+            $bank?->getAttribute('name'),
+            $branch?->getAttribute('name'),
+        ]));
+
+        $rawStatus = $record->getAttribute('active_loan_status');
+        $loanStatus = $rawStatus
+            ? LoanStatus::from((string) $rawStatus)->getLabel()
+            : 'No Active Loan';
+
+        return [
+            'National ID'   => $record->id_no ?? '—',
+            'Bank | Branch' => $bankBranch ?: '—',
+            'Loan Status'   => $loanStatus,
+        ];
     }
 }

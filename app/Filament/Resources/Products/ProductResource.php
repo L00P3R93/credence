@@ -28,6 +28,7 @@ class ProductResource extends Resource
     protected static ?int $navigationSort = 5;
 
     protected static ?string $recordTitleAttribute = 'name';
+    protected static bool $isGloballySearchable = false;
 
     public static function form(Schema $schema): Schema
     {

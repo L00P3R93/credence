@@ -30,6 +30,7 @@ class LoanResource extends Resource
     protected static ?int $navigationSort = 0;
 
     protected static ?string $recordTitleAttribute = 'loan_amount';
+    protected static bool $isGloballySearchable = false;
 
     public static function form(Schema $schema): Schema
     {

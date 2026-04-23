@@ -29,6 +29,7 @@ class PaymentResource extends Resource
     protected static string | UnitEnum | null $navigationGroup = 'Payments';
 
     protected static ?string $recordTitleAttribute = 'receipt_no';
+    protected static bool $isGloballySearchable = false;
 
     public static function form(Schema $schema): Schema
     {

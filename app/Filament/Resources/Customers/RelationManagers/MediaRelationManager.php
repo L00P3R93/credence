@@ -16,7 +16,6 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
 
 class MediaRelationManager extends RelationManager
@@ -55,9 +54,11 @@ class MediaRelationManager extends RelationManager
                     })
                     ->tooltip(fn ($record) => $record->mime_type),
 
-                ViewColumn::make('file_name')
-                    ->view('filament.tables.columns.file-name')
-                    ->label('File Name'),
+                TextColumn::make('file_name')
+                    ->label('File Name')
+                    ->url(fn ($record) => $record->getUrl())
+                    ->openUrlInNewTab()
+                    ->color('primary'),
                 // File size
                 TextColumn::make('size')
                     ->formatStateUsing(fn ($record) => number_format($record->size / 1024, 1) . ' KB'),
