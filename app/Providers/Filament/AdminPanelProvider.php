@@ -51,6 +51,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->discoverPages(in: app_path('Filament/Pages/Reports'), for: 'App\Filament\Pages\Reports')
             ->pages([
                 Dashboard::class,
             ])
@@ -64,7 +65,9 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 'Leads & Customers',
                 'Loan Management',
+                'Collections',
                 'Payments',
+                'Reports',
                 'Banks & Branches',
                 'User Management',
                 'System Management'

@@ -14,27 +14,29 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
 use BackedEnum;
 use UnitEnum;
 
-class CollectionsList extends Page implements HasTable
+class Defaulters extends Page implements HasTable
 {
     use InteractsWithTable;
 
     protected static string | UnitEnum | null $navigationGroup = 'Collections';
 
-    protected static string | BackedEnum | null $navigationIcon = 'hugeicons-money-receive-square';
+    protected static string | BackedEnum | null $navigationIcon = 'hugeicons-alert-circle';
 
-    protected static ?string $navigationLabel = 'Collections List';
+    protected static ?string $navigationLabel = 'Defaulters';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 7;
 
-    protected static ?string $title = 'Collections List';
+    protected static ?string $title = 'Defaulters';
 
-    protected string $view = 'filament.pages.collections-list';
+    protected string $view = 'filament.pages.defaulters';
 
     public function content(Schema $schema): Schema
     {
@@ -49,20 +51,8 @@ class CollectionsList extends Page implements HasTable
             ->query(
                 Loan::query()
                     ->withoutGlobalScope(ActiveLoanScope::class)
-                    ->whereIn('status', [
-                        LoanStatus::DISBURSED,
-                        LoanStatus::OVERDUE,
-                        LoanStatus::PAST_OVERDUE,
-                        LoanStatus::DUE_ROLL,
-                    ])
-                    ->whereBetween('due_date', [
-                        Carbon::now()->startOfMonth(),
-                        Carbon::now()->endOfMonth(),
-                    ])
+                    ->where('status', LoanStatus::PAST_OVERDUE)
                     ->withSum('payments', 'amount')
-                    ->whereRaw(
-                        '(SELECT COALESCE(SUM(amount), 0) FROM payments WHERE payments.loan_id = loans.id) < loans.loan_interest'
-                    )
                     ->with(['customer', 'bank', 'bankBranch'])
             )
             ->defaultSort('due_date', 'asc')
@@ -126,24 +116,6 @@ class CollectionsList extends Page implements HasTable
                             "(loan_total - COALESCE((SELECT SUM(amount) FROM payments WHERE payments.loan_id = loans.id), 0)) {$direction}"
                         );
                     }),
-
-                TextColumn::make('collection_status')
-                    ->label('Status')
-                    ->badge()
-                    ->state(function (Loan $record): string {
-                        $paid = $record->payments_sum_amount ?? 0;
-                        if ($record->due_date->lte(Carbon::today()) && $paid < $record->loan_interest) {
-                            return 'Due Payment';
-                        }
-                        return 'Over Due';
-                    })
-                    ->color(function (Loan $record): string {
-                        $paid = $record->payments_sum_amount ?? 0;
-                        if ($record->due_date->lte(Carbon::today()) && $paid < $record->loan_interest) {
-                            return 'info';
-                        }
-                        return 'danger';
-                    }),
             ])
             ->filters([
                 SelectFilter::make('bank_id')
@@ -160,15 +132,45 @@ class CollectionsList extends Page implements HasTable
                     ->preload()
                     ->searchable(),
 
-                SelectFilter::make('status')
-                    ->label('Loan Status')
-                    ->options([
-                        LoanStatus::DISBURSED->value => LoanStatus::DISBURSED->getLabel(),
-                        LoanStatus::OVERDUE->value => LoanStatus::OVERDUE->getLabel(),
-                        LoanStatus::PAST_OVERDUE->value => LoanStatus::PAST_OVERDUE->getLabel(),
-                        LoanStatus::DUE_ROLL->value => LoanStatus::DUE_ROLL->getLabel(),
+                Filter::make('due_date_month_year')
+                    ->label('Due Date Period')
+                    ->form([
+                        Select::make('month')
+                            ->label('Month')
+                            ->options([
+                                '1' => 'January', '2' => 'February', '3' => 'March',
+                                '4' => 'April', '5' => 'May', '6' => 'June',
+                                '7' => 'July', '8' => 'August', '9' => 'September',
+                                '10' => 'October', '11' => 'November', '12' => 'December',
+                            ])
+                            ->native(false)
+                            ->placeholder('All Months'),
+
+                        Select::make('year')
+                            ->label('Year')
+                            ->options(
+                                collect(range(Carbon::now()->year - 3, Carbon::now()->year + 1))
+                                    ->mapWithKeys(fn (int $y) => [$y => $y])
+                                    ->all()
+                            )
+                            ->native(false)
+                            ->placeholder('All Years'),
                     ])
-                    ->native(false),
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['month'] ?? null, fn (Builder $q, $month) => $q->whereMonth('due_date', $month))
+                            ->when($data['year'] ?? null, fn (Builder $q, $year) => $q->whereYear('due_date', $year));
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['month'] ?? null) {
+                            $indicators[] = 'Month: ' . Carbon::create()->month((int) $data['month'])->format('F');
+                        }
+                        if ($data['year'] ?? null) {
+                            $indicators[] = 'Year: ' . $data['year'];
+                        }
+                        return $indicators;
+                    }),
             ]);
     }
 }
