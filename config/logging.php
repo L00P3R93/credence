@@ -127,6 +127,15 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        // Dedicated channel for bot blocks, IP blocks, and honeypot hits.
+        // Tail this file to monitor attack traffic: tail -f storage/logs/blocked.log
+        'blocked' => [
+            'driver'            => 'single',
+            'path'              => storage_path('logs/blocked.log'),
+            'level'             => 'debug',
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];
